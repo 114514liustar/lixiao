@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>田子润的小窝</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .control-panel {
+            flex: 1;
+            min-width: 300px;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .preview-area {
+            flex: 2;
+            min-width: 300px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        select, input[type="range"], input[type="color"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        input[type="range"] {
+            padding: 8px 0;
+        }
+
+        .range-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        h1, h2, p {
+            margin-bottom: 15px;
+        }
+
+        .font-preview {
+            margin-top: 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+            min-height: 100px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>字体自定义设置</h1>
+    <div class="container">
+        <div class="control-panel">
+            <div class="control-group">
+                <label for="font-family">选择字体</label>
+                <select id="font-family">
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="'Georgia', serif">Georgia</option>
+                    <option value="'Verdana', sans-serif">Verdana</option>
+                    <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
+                    <option value="'SimSun', serif">宋体</option>
+                    <option value="'SimHei', sans-serif">黑体</option>
+                    <option value="'KaiTi', serif">楷体</option>
+                    <option value="'FangSong', serif">仿宋</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="font-size">字体大小 (12px - 36px)</label>
+                <input type="range" id="font-size" min="12" max="36" value="16">
+                <div class="range-info">
+                    <span>12px</span>
+                    <span id="size-display">16px</span>
+                    <span>36px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="font-weight">字体粗细</label>
+                <select id="font-weight">
+                    <option value="normal">正常 (400)</option>
+                    <option value="bold">粗体 (700)</option>
+                    <option value="100">超细 (100)</option>
+                    <option value="200">较细 (200)</option>
+                    <option value="300">细 (300)</option>
+                    <option value="500">中等 (500)</option>
+                    <option value="600">半粗 (600)</option>
+                    <option value="800">特粗 (800)</option>
+                    <option value="900">极粗 (900)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="font-color">字体颜色</label>
+                <input type="color" id="font-color" value="#333333">
+            </div>
+
+            <div class="control-group">
+                <label for="line-height">行高 (1.0 - 2.5)</label>
+                <input type="range" id="line-height" min="1.0" max="2.5" step="0.1" value="1.6">
+                <div class="range-info">
+                    <span>1.0</span>
+                    <span id="line-height-display">1.6</span>
+                    <span>2.5</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="preview-area">
+            <h2>田子润</h2>
+            <div class="font-preview" id="preview-content">
+                <h3>114514</h3>
+                <p>114514</p>
+                <p>114514</p>
+                <p>145114</p>
+                <p>114514</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const fontFamilySelect = document.getElementById('font-family');
+        const fontSizeSlider = document.getElementById('font-size');
+        const fontSizeDisplay = document.getElementById('size-display');
+        const fontWeightSelect = document.getElementById('font-weight');
+        const fontColorInput = document.getElementById('font-color');
+        const lineHeightSlider = document.getElementById('line-height');
+        const lineHeightDisplay = document.getElementById('line-height-display');
+        const previewContent = document.getElementById('preview-content');
+
+        // 更新预览效果的函数
+        function updatePreview() {
+            previewContent.style.fontFamily = fontFamilySelect.value;
+            previewContent.style.fontSize = `${fontSizeSlider.value}px`;
+            previewContent.style.fontWeight = fontWeightSelect.value;
+            previewContent.style.color = fontColorInput.value;
+            previewContent.style.lineHeight = lineHeightSlider.value;
+            
+            // 更新显示的数值
+            fontSizeDisplay.textContent = `${fontSizeSlider.value}px`;
+            lineHeightDisplay.textContent = lineHeightSlider.value;
+        }
+
+        // 为所有控制元素添加事件监听器
+        fontFamilySelect.addEventListener('change', updatePreview);
+        fontSizeSlider.addEventListener('input', updatePreview);
+        fontWeightSelect.addEventListener('change', updatePreview);
+        fontColorInput.addEventListener('input', updatePreview);
+        lineHeightSlider.addEventListener('input', updatePreview);
+
+        // 初始化预览
+        updatePreview();
+    </script>
+</body>
+</html>
