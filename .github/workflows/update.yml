@@ -1,0 +1,27 @@
+name: Update Resources
+on:
+  schedule:
+    - cron: '0 * * * *'  # 每小时同步一次
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout resource station
+        uses: actions/checkout@v3
+        
+      - name: Fetch resources list
+        run: |
+          # 这里会从您的资源仓库获取文件列表
+          echo "Fetching resources..."
+          
+      - name: Update site
+        run: |
+          # 这里会更新资源站的资源列表
+          echo "Updating resource list..."
+          
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Auto-update resources list"
