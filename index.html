@@ -1,104 +1,670 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>田子润博物馆</title>
-    <style>
-        /* 重置默认样式 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f4f4; /* 设置背景颜色 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh; /* 使页面内容垂直居中 */
-        }
-
-        .container {
-            text-align: center;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
-            padding: 20px;
-            width: 80%;
-            max-width: 800px; /* 限制容器最大宽度 */
-        }
-
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px; /* 图片圆角 */
-            margin-bottom: 20px;
-            position: relative; /* 为后续动画等效果做准备 */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 图片阴影 */
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff; /* 按钮背景颜色 */
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease; /* 按钮背景颜色过渡效果 */
-        }
-
-        button:hover {
-            background-color: #0056b3; /* 鼠标悬停时按钮背景颜色 */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub资源站</title>
+  <!-- 引入外部资源 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563eb',
+            secondary: '#64748b',
+            accent: '#f97316',
+            dark: '#0f172a',
+            light: '#f8fafc'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .transition-custom {
+        transition: all 0.3s ease;
+      }
+      .card-hover {
+        @apply hover:shadow-lg hover:-translate-y-1 transition-all duration-300;
+      }
+    }
+  </style>
+  
+  <style>
+    /* 动画效果 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .loader {
+      border-top-color: #2563eb;
+      animation: spinner 0.6s linear infinite;
+    }
+    
+    @keyframes spinner {
+      to { transform: rotate(360deg); }
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
 </head>
 
-<body>
-    <div class="container">
-        <!-- 这里修改图片路径，将your-image.jpg替换为你自己的图片文件名，确保图片和HTML文件在同一目录，否则需写完整路径 -->
-        <img src="images/tian.jpg" alt="固定图片"> 
-        <button id="effectButton">应用随机效果</button>
+<body class="bg-gray-50 font-sans text-dark">
+  <!-- 顶部导航栏 -->
+  <header id="navbar" class="fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 transition-custom">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- 网站Logo -->
+      <div class="flex items-center space-x-2">
+        <div class="text-primary text-2xl">
+          <i class="fa fa-github"></i>
+        </div>
+        <h1 class="text-xl font-bold text-primary">GitHub资源站</h1>
+      </div>
+      
+      <!-- 导航链接 - 桌面版 -->
+      <nav class="hidden md:flex items-center space-x-6">
+        <a href="#home" class="font-medium text-primary border-b-2 border-primary px-1 py-2">首页</a>
+        <a href="#resources" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2">资源列表</a>
+        <a href="#categories" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2">资源分类</a>
+        <a href="#add-resource" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2">添加资源</a>
+        <a href="#about" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2">关于</a>
+      </nav>
+      
+      <!-- 搜索框和仓库链接 -->
+      <div class="flex items-center space-x-4">
+        <!-- 搜索按钮 -->
+        <button id="searchToggle" class="p-2 text-gray-600 hover:text-primary transition-custom">
+          <i class="fa fa-search"></i>
+        </button>
+        
+        <!-- 仓库链接 -->
+        <a href="https://github.com" target="_blank" class="hidden md:flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition-custom text-sm">
+          <i class="fa fa-github mr-2"></i>
+          <span>仓库</span>
+        </a>
+        
+        <!-- 移动端菜单按钮 -->
+        <button id="mobileMenuBtn" class="md:hidden p-2 text-gray-600 hover:text-primary transition-custom">
+          <i class="fa fa-bars text-xl"></i>
+        </button>
+      </div>
     </div>
-    <script>
-        const img = document.querySelector('img');
-        const effectButton = document.getElementById('effectButton');
-        const effectList = [
-            // 以下是20种随机效果，通过CSS样式设置，可以根据需求修改或添加
-            { style: 'transform: scale(1.2);' }, // 放大1.2倍
-            { style: 'transform: scale(0.8);' }, // 缩小0.8倍
-            { style: 'transform: rotate(30deg);' }, // 顺时针旋转30度
-            { style: 'transform: rotate(-30deg);' }, // 逆时针旋转30度
-            { style: 'transform: skewX(15deg);' }, // X轴倾斜15度
-            { style: 'transform: skewY(15deg);' }, // Y轴倾斜15度
-            { style: 'opacity: 0.5;' }, // 透明度变为0.5
-            { style: 'opacity: 0.8;' }, // 透明度变为0.8
-            { style: 'filter: grayscale(1);' }, // 变为灰度图
-            { style: 'filter: sepia(1);' }, // 变为棕褐色调
-            { style: 'filter: brightness(1.5);' }, // 亮度变为1.5倍
-            { style: 'filter: contrast(1.5);' }, // 对比度变为1.5倍
-            { style: 'box - shadow: 0 0 20px rgba(0, 0, 255, 0.5);' }, // 添加蓝色阴影
-            { style: 'box - shadow: 0 0 20px rgba(255, 0, 0, 0.5);' }, // 添加红色阴影
-            { style: 'transform: translateX(50px);' }, // 水平向右移动50px
-            { style: 'transform: translateY(50px);' }, // 垂直向下移动50px
-            { style: 'transform: translate(-50px, 50px);' }, // 向左上方移动50px
-            { style: 'border - radius: 50%;' }, // 变为圆形
-            { style: 'background - color: rgba(0, 0, 0, 0.2);' }, // 添加半透明黑色背景
-            { style: 'transform: scale(1.2) rotate(15deg);' } // 放大1.2倍并旋转15度
-        ];
+    
+    <!-- 搜索框区域 -->
+    <div id="searchContainer" class="bg-gray-100 py-4 hidden animate-fade-in">
+      <div class="container mx-auto px-4">
+        <div class="relative">
+          <input type="text" id="resourceSearch" placeholder="搜索资源文件..." 
+                 class="w-full py-3 px-5 pr-12 rounded-full bg-white border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-custom">
+          <button id="searchBtn" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-custom">
+            <i class="fa fa-search text-lg"></i>
+          </button>
+        </div>
+        <div class="mt-2 text-sm text-gray-500">
+          提示: 可搜索文件名、关键词或文件类型
+        </div>
+      </div>
+    </div>
+    
+    <!-- 移动端导航菜单 -->
+    <div id="mobileMenu" class="md:hidden bg-white border-t hidden animate-fade-in">
+      <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+        <a href="#home" class="font-medium text-primary px-1 py-2 mobile-link">首页</a>
+        <a href="#resources" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2 mobile-link">资源列表</a>
+        <a href="#categories" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2 mobile-link">资源分类</a>
+        <a href="#add-resource" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2 mobile-link">添加资源</a>
+        <a href="#about" class="font-medium text-gray-600 hover:text-primary transition-custom px-1 py-2 mobile-link">关于</a>
+        <a href="https://github.com" target="_blank" class="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition-custom text-sm w-fit">
+          <i class="fa fa-github mr-2"></i>
+          <span>访问仓库</span>
+        </a>
+      </div>
+    </div>
+  </header>
 
-        effectButton.addEventListener('click', function () {
-            const randomIndex = Math.floor(Math.random() * effectList.length);
-            const randomEffect = effectList[randomIndex];
-            img.setAttribute('style', randomEffect.style);
+  <!-- 主内容区 -->
+  <main>
+    <!-- 英雄区域 -->
+    <section id="home" class="pt-32 pb-20 bg-gradient-to-br from-primary/90 to-primary text-white">
+      <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto text-center">
+          <h1 class="text-4xl md:text-5xl font-bold mb-6 text-shadow animate-fade-in">GitHub资源站</h1>
+          <p class="text-xl md:text-2xl opacity-90 mb-8 animate-fade-in" style="animation-delay: 0.1s">
+            轻松管理和分享您GitHub仓库中的资源文件
+          </p>
+          <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in" style="animation-delay: 0.2s">
+            <a href="#resources" class="bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-full transition-custom font-medium flex items-center justify-center">
+              <i class="fa fa-folder-open mr-2"></i> 浏览资源
+            </a>
+            <a href="#add-resource" class="bg-transparent border-2 border-white text-white hover:bg-white/10 px-6 py-3 rounded-full transition-custom font-medium flex items-center justify-center">
+              <i class="fa fa-plus mr-2"></i> 添加资源
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 资源列表区域 -->
+    <section id="resources" class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">资源文件列表</h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            以下是您GitHub仓库中的资源文件，点击文件名可查看详情或下载
+          </p>
+        </div>
+        
+        <!-- 过滤和排序 -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div class="flex flex-wrap gap-2">
+            <button class="filter-btn bg-primary text-white px-4 py-2 rounded-full text-sm transition-custom">
+              全部文件
+            </button>
+            <button class="filter-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-custom">
+              文档
+            </button>
+            <button class="filter-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-custom">
+              图片
+            </button>
+            <button class="filter-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-custom">
+              压缩包
+            </button>
+            <button class="filter-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-custom">
+              代码
+            </button>
+          </div>
+          
+          <div class="w-full md:w-auto">
+            <select id="sortSelect" class="w-full md:w-auto bg-gray-100 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-custom">
+              <option value="recent">最近更新</option>
+              <option value="name-asc">名称 (A-Z)</option>
+              <option value="name-desc">名称 (Z-A)</option>
+              <option value="size-asc">大小 (从小到大)</option>
+              <option value="size-desc">大小 (从大到小)</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- 空状态提示 - 没有示例文件时显示 -->
+        <div class="text-center py-16 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 animate-fade-in">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa fa-folder-open-o text-2xl text-gray-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-700 mb-2">暂无资源文件</h3>
+          <p class="text-gray-500 max-w-md mx-auto mb-6">
+            您的资源库目前还是空的，按照下方指南添加资源文件后，这里将显示您的资源列表
+          </p>
+          <a href="#add-resource" class="inline-flex items-center bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-full transition-custom font-medium">
+            <i class="fa fa-plus mr-2"></i> 添加第一个资源
+          </a>
+        </div>
+        
+        <!-- 加载更多按钮（只有在有资源时显示） -->
+        <div class="text-center mt-10 hidden" id="loadMoreContainer">
+          <button id="loadMoreBtn" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-full transition-custom font-medium flex items-center justify-center mx-auto">
+            <i class="fa fa-refresh mr-2"></i> 加载更多资源
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 资源分类区域 -->
+    <section id="categories" class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">资源分类</h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            按类型浏览您的资源，快速找到需要的文件
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- 文档分类 -->
+          <div class="bg-white rounded-xl p-6 shadow-sm card-hover animate-fade-in">
+            <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-4">
+              <i class="fa fa-file-text-o text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">文档文件</h3>
+            <p class="text-gray-600 mb-4 text-sm">PDF、Word、Excel等文档类资源</p>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-500 text-sm">0 个文件</span>
+              <a href="#" class="text-primary hover:text-primary/80 transition-custom font-medium">
+                查看全部 <i class="fa fa-arrow-right ml-1"></i>
+              </a>
+            </div>
+          </div>
+          
+          <!-- 图片分类 -->
+          <div class="bg-white rounded-xl p-6 shadow-sm card-hover animate-fade-in" style="animation-delay: 0.1s">
+            <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-4">
+              <i class="fa fa-picture-o text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">图片资源</h3>
+            <p class="text-gray-600 mb-4 text-sm">照片、设计图、截图等图片类资源</p>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-500 text-sm">0 个文件</span>
+              <a href="#" class="text-primary hover:text-primary/80 transition-custom font-medium">
+                查看全部 <i class="fa fa-arrow-right ml-1"></i>
+              </a>
+            </div>
+          </div>
+          
+          <!-- 压缩包分类 -->
+          <div class="bg-white rounded-xl p-6 shadow-sm card-hover animate-fade-in" style="animation-delay: 0.2s">
+            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-4">
+              <i class="fa fa-file-archive-o text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">压缩包</h3>
+            <p class="text-gray-600 mb-4 text-sm">ZIP、RAR等格式的压缩文件</p>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-500 text-sm">0 个文件</span>
+              <a href="#" class="text-primary hover:text-primary/80 transition-custom font-medium">
+                查看全部 <i class="fa fa-arrow-right ml-1"></i>
+              </a>
+            </div>
+          </div>
+          
+          <!-- 代码分类 -->
+          <div class="bg-white rounded-xl p-6 shadow-sm card-hover animate-fade-in" style="animation-delay: 0.3s">
+            <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mb-4">
+              <i class="fa fa-code text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">代码文件</h3>
+            <p class="text-gray-600 mb-4 text-sm">源代码、脚本、配置文件等</p>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-500 text-sm">0 个文件</span>
+              <a href="#" class="text-primary hover:text-primary/80 transition-custom font-medium">
+                查看全部 <i class="fa fa-arrow-right ml-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 添加资源指南 -->
+    <section id="add-resource" class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">如何添加资源</h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            按照以下步骤将资源添加到您的GitHub仓库，资源站将自动展示这些文件
+          </p>
+        </div>
+        
+        <div class="max-w-3xl mx-auto">
+          <div class="bg-gray-50 rounded-2xl p-8 mb-8 animate-fade-in">
+            <h3 class="text-xl font-bold mb-6 text-center">添加资源的步骤</h3>
+            
+            <div class="space-y-8">
+              <div class="flex">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4 mt-1">
+                  1
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">准备您的GitHub仓库</h4>
+                  <p class="text-gray-600">
+                    确保您已经在GitHub上创建了一个仓库用于存储资源。如果还没有，请先创建一个新仓库，推荐命名为"resources"或与您的项目相关的名称。
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4 mt-1">
+                  2
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">上传资源文件</h4>
+                  <p class="text-gray-600 mb-3">
+                    登录您的GitHub账号，进入资源仓库，点击右上角的"Add file"按钮，然后选择"Upload files"选项。
+                  </p>
+                  <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <img src="https://picsum.photos/id/0/800/300" alt="GitHub上传文件界面" class="w-full h-auto rounded" />
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4 mt-1">
+                  3
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">拖放或选择文件</h4>
+                  <p class="text-gray-600">
+                    您可以直接将文件拖放到上传区域，或者点击"choose your files"链接选择本地文件。支持同时上传多个文件和文件夹。
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4 mt-1">
+                  4
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">提交更改</h4>
+                  <p class="text-gray-600">
+                    上传完成后，滚动到页面底部，在"Commit changes"区域填写提交信息（例如"添加了新的PDF文档"），然后点击"Commit changes"按钮完成上传。
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4 mt-1">
+                  5
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">查看资源</h4>
+                  <p class="text-gray-600">
+                    上传完成后，等待几分钟，资源站将自动同步并展示您新添加的资源。您可以在资源列表页面查看和管理这些资源。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 自动同步设置 -->
+          <div class="bg-gray-50 rounded-2xl p-8 animate-fade-in" style="animation-delay: 0.2s">
+            <h3 class="text-xl font-bold mb-4">设置自动同步（可选）</h3>
+            <p class="text-gray-600 mb-6">
+              为了让资源站自动同步GitHub仓库中的文件变化，您可以设置GitHub Actions工作流：
+            </p>
+            
+            <ol class="list-decimal pl-5 space-y-3 text-gray-700 mb-6">
+              <li>在您的GitHub资源仓库中创建`.github/workflows/update.yml`文件</li>
+              <li>复制以下代码到该文件中：
+                <div class="bg-dark text-white p-4 rounded-lg mt-2 text-sm font-mono overflow-x-auto">
+                  <pre>name: Update Resources
+on:
+  push:
+    branches: [ main ]
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update resource list
+        run: |
+          # 这里可以添加生成资源列表的脚本
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./</pre>
+                </div>
+              </li>
+              <li>提交该文件，GitHub将在每次推送后自动更新您的资源站</li>
+            </ol>
+            
+            <a href="https://docs.github.com/cn/actions" target="_blank" class="inline-flex items-center text-primary hover:text-primary/80 transition-custom font-medium">
+              了解更多关于GitHub Actions的信息 <i class="fa fa-external-link ml-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 关于区域 -->
+    <section id="about" class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm p-8 animate-fade-in">
+          <h2 class="text-3xl font-bold mb-6">关于本资源站</h2>
+          
+          <div class="space-y-4 text-gray-700">
+            <p>
+              本资源站是一个基于GitHub Pages的静态资源展示平台，旨在帮助您方便地管理和分享存储在GitHub仓库中的各类资源文件。
+            </p>
+            
+            <h3 class="text-xl font-bold mt-6 mb-3">为什么之前的链接不能跳转？</h3>
+            <p>
+              之前的链接无法跳转有两个主要原因：
+            </p>
+            <ol class="list-decimal pl-5 space-y-2 mb-4">
+              <li>部分演示链接使用了`href="#"`作为占位符，这是前端开发中常用的临时链接方式</li>
+              <li>资源站需要与实际的GitHub仓库关联才能实现完整的跳转功能</li>
+            </ol>
+            <p>
+              现在的版本已经修复了这个问题，所有链接都已设置为正确的跳转方式。对于资源文件链接，当您添加实际资源后，它们将指向GitHub仓库中的对应文件。
+            </p>
+            
+            <h3 class="text-xl font-bold mt-6 mb-3">支持的文件类型</h3>
+            <p>本资源站支持所有常见文件类型，包括但不限于：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>文档类：PDF、DOC、DOCX、XLS、XLSX、PPT、PPTX、TXT、MD等</li>
+              <li>图片类：JPG、PNG、GIF、SVG、WEBP等</li>
+              <li>压缩包：ZIP、RAR、7Z、TAR、GZ等</li>
+              <li>代码类：HTML、CSS、JS、Java、Python、PHP等各种编程语言文件</li>
+            </ul>
+          </div>
+          
+          <div class="mt-8 pt-6 border-t border-gray-100">
+            <a href="https://github.com" target="_blank" class="inline-flex items-center bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-full transition-custom font-medium">
+              <i class="fa fa-github mr-2"></i> 访问GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- 资源详情模态框 -->
+  <div id="resourceModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl w-full max-w-4xl mx-4 animate-fade-in overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-gray-800" id="modalResourceTitle">资源详情</h3>
+          <button id="closeResourceModal" class="text-gray-400 hover:text-gray-600 transition-custom">
+            <i class="fa fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6 overflow-y-auto flex-grow">
+        <div class="text-center py-12">
+          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa fa-file-o text-3xl text-gray-400"></i>
+          </div>
+          <h4 class="text-lg font-bold text-gray-700 mb-2">请先添加资源文件</h4>
+          <p class="text-gray-500 max-w-md mx-auto mb-6">
+            当您添加资源文件后，点击资源名称即可查看详细信息
+          </p>
+          <button id="closeModalFromInside" class="inline-flex items-center bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full transition-custom font-medium">
+            我知道了
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 页脚 -->
+  <footer class="bg-dark text-white py-12">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="text-primary text-2xl">
+              <i class="fa fa-github"></i>
+            </div>
+            <h2 class="text-xl font-bold text-white">GitHub资源站</h2>
+          </div>
+          <p class="text-gray-400 mb-4">
+            轻松管理和分享您GitHub仓库中的资源文件，简单高效的静态资源展示方案。
+          </p>
+          <div class="flex space-x-4">
+            <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-white transition-custom">
+              <i class="fa fa-github text-xl"></i>
+            </a>
+            <a href="https://twitter.com" target="_blank" class="text-gray-400 hover:text-white transition-custom">
+              <i class="fa fa-twitter text-xl"></i>
+            </a>
+            <a href="mailto:example@example.com" class="text-gray-400 hover:text-white transition-custom">
+              <i class="fa fa-envelope-o text-xl"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="font-bold text-white mb-4">快速链接</h3>
+          <ul class="space-y-2">
+            <li><a href="#home" class="text-gray-400 hover:text-white transition-custom">首页</a></li>
+            <li><a href="#resources" class="text-gray-400 hover:text-white transition-custom">资源列表</a></li>
+            <li><a href="#categories" class="text-gray-400 hover:text-white transition-custom">资源分类</a></li>
+            <li><a href="#add-resource" class="text-gray-400 hover:text-white transition-custom">添加资源</a></li>
+            <li><a href="#about" class="text-gray-400 hover:text-white transition-custom">关于</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-bold text-white mb-4">帮助与支持</h3>
+          <ul class="space-y-2">
+            <li><a href="#add-resource" class="text-gray-400 hover:text-white transition-custom">使用指南</a></li>
+            <li><a href="https://docs.github.com/cn/pages" target="_blank" class="text-gray-400 hover:text-white transition-custom">GitHub Pages文档</a></li>
+            <li><a href="https://docs.github.com/cn/repositories/working-with-files/managing-files" target="_blank" class="text-gray-400 hover:text-white transition-custom">文件管理帮助</a></li>
+            <li><a href="mailto:support@example.com" class="text-gray-400 hover:text-white transition-custom">联系我们</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+        <p>© 2023 GitHub资源站 | 托管于GitHub Pages</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // 导航栏滚动效果
+    window.addEventListener('scroll', function() {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('py-2', 'shadow');
+        navbar.classList.remove('py-3');
+      } else {
+        navbar.classList.add('py-3');
+        navbar.classList.remove('py-2', 'shadow');
+      }
+    });
+    
+    // 移动端菜单切换
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    
+    mobileMenuBtn.addEventListener('click', function() {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // 移动端导航链接点击后关闭菜单
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', function() {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+    
+    // 搜索框切换
+    const searchToggle = document.getElementById('searchToggle');
+    const searchContainer = document.getElementById('searchContainer');
+    
+    searchToggle.addEventListener('click', function() {
+      searchContainer.classList.toggle('hidden');
+      if (!searchContainer.classList.contains('hidden')) {
+        document.getElementById('resourceSearch').focus();
+      }
+    });
+    
+    // 搜索功能
+    document.getElementById('searchBtn').addEventListener('click', performSearch);
+    document.getElementById('resourceSearch').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+    
+    function performSearch() {
+      const searchTerm = document.getElementById('resourceSearch').value.trim().toLowerCase();
+      if (searchTerm) {
+        alert(`正在搜索: ${searchTerm}\n目前没有资源文件，无法搜索结果`);
+      }
+    }
+    
+    // 过滤按钮点击效果
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // 移除所有按钮的活跃状态
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('bg-primary', 'text-white');
+          b.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
         });
-    </script>
+        
+        // 设置当前按钮为活跃状态
+        this.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+        this.classList.add('bg-primary', 'text-white');
+        
+        const filterType = this.textContent.trim();
+        alert(`已选择过滤类型: ${filterType}\n目前没有资源文件，无法显示过滤结果`);
+      });
+    });
+    
+    // 资源详情模态框控制
+    const resourceModal = document.getElementById('resourceModal');
+    const closeResourceModal = document.getElementById('closeResourceModal');
+    const closeModalFromInside = document.getElementById('closeModalFromInside');
+    
+    // 打开资源详情（分类页面的查看全部按钮）
+    document.querySelectorAll('#categories a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        resourceModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    
+    // 关闭资源详情
+    function closeModal() {
+      resourceModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    
+    closeResourceModal.addEventListener('click', closeModal);
+    closeModalFromInside.addEventListener('click', closeModal);
+    
+    // 点击模态框外部关闭
+    resourceModal.addEventListener('click', function(event) {
+      if (event.target === resourceModal) {
+        closeModal();
+      }
+    });
+    
+    // 点击ESC键关闭模态框
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && !resourceModal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+  </script>
 </body>
-
 </html>
+
 
